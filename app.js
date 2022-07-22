@@ -1,19 +1,87 @@
-const products = require('./array');
-
 const express = require('express');
+
+
+let produtos = require("./produtos")
 
 const app = express();
 
-app.use(express.json());
+app.use(express.json())
 
-app.get('/', (req, res) => {
-    res.send('Hello world');
+app.get('/produtos', (req,res)=>{
+    res.status(200).json(produtos)
 })
 
-app.listen(3000, () => 
-    console.log('servidor em execução')
-)
 
-app.post('/produto', (req, res) => {
-    console.log(req.body)
+app.post('/produtos' , (req, res)=>{
+
+    const content = req.body
+
+    produtos = [...produtos, content]
+
+    res.status(201).json(produtos)
 })
+
+
+
+app.get('/produtos/:id/:details?', (req, res)=>{
+
+    const id = Number(req.params.id)
+
+    const details = req.params.details || "não possui descrição"
+
+    const product = produtos.find((produto)=> produto.id === id)
+
+    res.status(200).json(product)
+})
+
+app.put('/produtos/:id', (req, res)=>{
+    const id = Number(req.params.id)
+    const content = req.body
+
+    const product = produtos.find((produto)=> produto.id === id)
+
+    if(!product){
+        res.status(400).json({"mensagem": "produto não encontrado"})
+    }
+
+
+   const produtoAtt =  produtos.map((produto)=>{
+        if(produto.id === id){
+            return content
+        }
+        return produto
+    })
+
+    
+    produtos = produtoAtt
+res.status(200).json(produtos)
+
+})
+
+
+
+app.delete('/produtos/:id', (req, res)=>{
+    const id = Number(req.params.id)
+
+    const product = produtos.find((produto)=> produto.id === id)
+
+    if(!product){
+        res.status(400).json({"mensagem": "produto não encontrado"})
+    }
+
+    produtos = produtos.filter((produto)=>{
+
+        return produto.id !== id
+
+    })
+
+    res.status(200).json(produtos)
+
+})
+
+
+
+
+
+
+app.listen(3001, ()=>{console.log("Servidor online")})
